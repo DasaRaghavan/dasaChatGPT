@@ -3,6 +3,7 @@ import sys
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QTextEdit,
                              QLineEdit, QPushButton, QLabel)
+from backend import Chatbot
 
 
 class ChatbotWindow(QMainWindow):
@@ -10,6 +11,7 @@ class ChatbotWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("ChatGPT Main Window")
         self.setMinimumSize(710, 480)
+        self.chatbot = Chatbot()
 
         # add chat area widget
         self.chat_area = QTextEdit(self)
@@ -18,7 +20,7 @@ class ChatbotWindow(QMainWindow):
 
         # add input widget
         input_label = QLabel("Message", self)
-        input_label.setGeometry(10,340,70,20)
+        input_label.setGeometry(10, 340, 70, 20)
         self.input_field = QLineEdit(self)
         self.input_field.setGeometry(70, 340, 480, 40)
 
@@ -31,8 +33,18 @@ class ChatbotWindow(QMainWindow):
         # add send button
         self.send_button = QPushButton("Send", self)
         self.send_button.setGeometry(560, 360, 100, 40)
+        self.send_button.clicked.connect(self.send_message)
 
         self.show()
+
+    def send_message(self):
+        message = self.input_field.text().strip()
+        persona = self.persona_field.text().strip()
+        self.input_field.clear()
+        self.persona_field.clear()
+        response = self.chatbot.get_response(user_input=message, persona=persona)
+        self.chat_area.setText(f"<p style='color:#333333'>Me: {message}, Respond as: {persona}</p>"
+                               f"<p style='color:#333333; background-color:#E9E9E9'>Response:{response}</p>")
 
 
 app = QApplication(sys.argv)
