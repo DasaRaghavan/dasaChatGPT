@@ -1,5 +1,6 @@
 # create two classes one for the chatbot window and the other for the chatbot logic
 import sys
+import threading
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QTextEdit,
                              QLineEdit, QPushButton, QLabel)
@@ -23,6 +24,7 @@ class ChatbotWindow(QMainWindow):
         input_label.setGeometry(10, 340, 70, 20)
         self.input_field = QLineEdit(self)
         self.input_field.setGeometry(70, 340, 480, 40)
+        self.input_field.returnPressed.connect(self.send_message)
 
         # add persona widget
         persona_label = QLabel("Persona", self)
@@ -42,9 +44,14 @@ class ChatbotWindow(QMainWindow):
         persona = self.persona_field.text().strip()
         self.input_field.clear()
         self.persona_field.clear()
+        self.chat_area.setText(f"<p style='color:#333333'>Me: {message}, Respond as: {persona}</p>")
+        thread = threading.Thread(target=self.get_bot_response, args=(message, persona))
+        thread.start()
+
+    def get_bot_response(self, message, persona):
         response = self.chatbot.get_response(user_input=message, persona=persona)
-        self.chat_area.setText(f"<p style='color:#333333'>Me: {message}, Respond as: {persona}</p>"
-                               f"<p style='color:#333333; background-color:#E9E9E9'>Response:{response}</p>")
+        self.chat_area.append(f"<p style='color:#333333; background-color:#E9E9E9'>"
+                              f"Response:{response}</p>")
 
 
 app = QApplication(sys.argv)
